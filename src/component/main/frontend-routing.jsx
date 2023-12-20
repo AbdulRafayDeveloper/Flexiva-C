@@ -47,7 +47,6 @@ function FrontendRoutes() {
         <Route path='/booking' element={<MainLayout><Booking/></MainLayout>}/>
         <Route path='/appoimentForm' element={<MainLayout><AppoimentForm/></MainLayout>}/>
         <Route path='/become-a-partner' element={<MainLayout><Becomeapartner/></MainLayout>}/>
-  
     </Routes>
 
     </div>

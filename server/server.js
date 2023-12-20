@@ -1,43 +1,55 @@
-// server.js
-const express = require('express');
-const connectDB = require('./config/db');
-const authRoutes = require('./routes/auth');
-const authMiddleware = require('./middleware/auth');
-const http = require('http');
-const socketIo = require('socket.io');
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config()
+require('express-async-errors')
+const express = require('express')
+const path = require('path')
+const { logger, logEvents } = require('./middleware/logger')
+const errorHandler = require('./middleware/errorHandler')
+const cookieParser = require('cookie-parser')
+const cors = require('cors')
+const corsConfigs = require('./config/corsConfigs')
+const allowedOrigins = require('./config/allowedOrigins')
+const mongoose = require('mongoose')
+const connectDB = require('./config/dbConn')
+const credentials = require('./middleware/credentials')
+const app = express()
+const port = process.env.PORT || 3500
 
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+connectDB()
 
-// Connect to MongoDB
-connectDB();
+app.use(logger)
+app.use(credentials)
+app.use(cors(corsConfigs))
+app.use(express.json())
+app.use(cookieParser())
+app.use('/', express.static(path.join(__dirname, '/views')))
+app.use('/images', express.static('images'))
+app.use('/', require('./routes/root'))
 
-// Middleware
-app.use(express.json());
+// Socketio must be declared before api routes
+const server = require('http').createServer(app)
+const io = require('socket.io')(server, {
+  transports: ['polling'],
+  cors: { origin: allowedOrigins },
+})
+require('./socketio.js')(io)
+app.use('/users', require('./routes/userRoutes'))
+app.use('/auth', require('./routes/authRoutes'))
+app.use('/notifications', require('./routes/notificationRoutes'))
+app.all('*', require('./routes/404'))
 
-// Routes
-app.use('/auth', authRoutes);
+app.use(errorHandler)
 
-// Protected route example using authMiddleware
-app.get('/protected', authMiddleware, (req, res) => {
-  res.json({ message: 'This is a protected route' });
-});
-
-// Socket.io connection
-io.on('connection', (socket) => {
-  console.log('Socket connected:', socket.id);
-
-  // Handle socket events here
-
-  socket.on('disconnect', () => {
-    console.log('Socket disconnected:', socket.id);
-  });
-});
-
-// Start the server
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+mongoose.connection.once('open', () => {
+  server.listen(port, () => {
+    console.log('Successfully Connected to MongoDB')
+    console.log(`Application running on port: ${port}`);
+  })
+})
+mongoose.connection.on('error', (err) => {
+  // TODO send notification to all admins by saving notification in with each admin id
+  console.log(err)
+  logEvents(
+    `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}\t`,
+    'mongoDBErrLog.log'
+  )
+})
