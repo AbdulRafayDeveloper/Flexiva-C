@@ -1,5 +1,6 @@
 import React from 'react'
 import UserSidebar from '../includes/sidebar'
+import { Link } from 'react-router-dom'
 
 export default function UserDashboard() {
   return (
@@ -28,9 +29,9 @@ export default function UserDashboard() {
                       Thursday 21-09-2023 - 01:00 PM
                     </span>
                   </p>
-                  <a className="card-title" href="#">
+                  <Link className="card-title" to="/user/order-status/456">
                     Track Status
-                  </a>
+                  </Link>
                 
                 
                 </div>
