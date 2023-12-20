@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import singUp from "../assets/image/singnin.png";
 import singIn from "../assets/image/signin.png";
@@ -10,6 +10,8 @@ import GoogleIcon from "../assets/image/Google.png";
 import GitIcon from "../assets/image/GitHub.png";
 import logo from "../assets/image/logo.png";
 import { Helmet } from 'react-helmet';
+import { useDispatch, useSelector } from "react-redux";
+import { setUserField } from "../../features/userSlicer";
 
 
 function Header() {
@@ -32,6 +34,27 @@ function Header() {
 
   const handleCloseSignInMobile = () => setShowSignInMobile(false);
   const handleShowSignInMobile = () => setShowSignInMobile(true);
+
+  ////////////////////////////////////////////////////////////
+
+  const [user, setUser] = useState({ fullName: "", email: "", password: ""});
+  const onChange = (element) => {
+    setUser({ ...user, [element.target.name]: element.target.value });
+  }
+  const dispatch = useDispatch();
+  const navigate= useNavigate();
+
+
+  const loading = useSelector((state) => state.user.loading);
+  const error = useSelector((state) => state.user.error);
+
+  const handleSignUpSubmit = async (event) => {
+    event.preventDefault();  
+    dispatch(setUserField(user));    
+    setShowSignUp(false);
+    navigate('/signin');
+
+  }
 
   return (
     <>
@@ -87,7 +110,7 @@ function Header() {
                       </div>
                       <div className="col-lg-6  col-md-6 col-sm-6">
                         <div className="sing_detail p-3 ps-0">
-                          <Form>
+                          <Form onSubmit={handleSignUpSubmit}>
                             <h4 className="sign_title py-3 pt-5">
                               Welcome to Flexiva
                             </h4>
@@ -100,18 +123,24 @@ function Header() {
                                 className="mb-2"
                                 type="text"
                                 placeholder=""
+                                name="fullName"
+                                onChange={onChange}
                               />
                               <Form.Label>Email address</Form.Label>
                               <Form.Control
                                 className="mb-2"
                                 type="email"
                                 placeholder=""
+                                name="email"
+                                onChange={onChange}
                               />
                               <Form.Label>Password</Form.Label>
                               <Form.Control
                                 className="mb-2"
                                 type="password"
                                 placeholder=""
+                                name="password"
+                                onChange={onChange}
                               />
                             </Form.Group>
 
@@ -126,9 +155,9 @@ function Header() {
                             </Form.Group>
                             
                               <Button className="sign_but" type="submit">
-                              <Link className="text-light" to={'/signin'}>
+                              {/* <Link className="text-light" to={'/signin'}> */}
                                 Create An Account
-                            </Link>
+                            {/* </Link> */}
 
                                 {/* <img src={rightArrow} alt="rightArrow"/> */}
                               </Button>
