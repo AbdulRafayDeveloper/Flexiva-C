@@ -5,6 +5,9 @@ const path = require('path')
 const notification = require('../models/notification')
 const validator = require('validator');
 
+const jwt = require('jsonwebtoken');
+const Jwt_Secret_Key = "KeyByProctorialPrismSty@le";
+
 // @desc Get all users
 // @Route GET /users
 // @Access Private
@@ -39,16 +42,15 @@ const getOneUser = async (req, res) => {
 // @Route POST /users
 // @Access Private
 const createNewUser = async (req, res) => {
-  const { username, password, email, roles } = req.body
+  const { fullName, password, email, role, dob, gender, addressLine1, addressLine2, phone, state, city, zipCode,medicalCondition,medicalConditionYesDetail,medication,medicationYesDetail,fitnessWeightLossGoalDesc } = req.body
   //Confirm data
   if (
-    !username ||
-    username.length < 4 ||
+    !fullName ||
+    fullName.length < 4 ||
     !password ||
     password.length < 6 ||
     !email ||
-    !Array.isArray(roles) ||
-    !roles.length
+    !role
   ) {
     return res
       .status(400)
@@ -62,20 +64,38 @@ const createNewUser = async (req, res) => {
 
 
   // Check for duplicate
-  const duplicate = await user.findOne({ username }).lean().exec()
+  const duplicate = await user.findOne({ fullName }).lean().exec()
   if (duplicate) {
     return res.status(409).json({ message: 'user already exist' })
   }
   const hashedPassword = await bcrypt.hash(password, 10)
   //create new user
   const newUser = await user.create({
-    username,
+    fullName,
     password: hashedPassword,
     email,
-    roles,
+    role,
+    dob, 
+    gender, 
+    addressLine1, 
+    addressLine2, 
+    phone, 
+    state, 
+    city, 
+    zipCode,
+    medicalCondition,
+    medicalConditionYesDetail,
+    medication,medicationYesDetail,
+    fitnessWeightLossGoalDesc
   })
   if (newUser) {
-    res.json({ message: `new user ${username} created with success` })
+    const getData = {
+      user: {
+          id: newUser._id
+      }
+  }
+  const auth_token = jwt.sign(getData, Jwt_Secret_Key);
+    res.json({ toekn: auth_token });
   } else {
     res.status(400).json({
       message: 'user creation failed, please verify your data and try again',

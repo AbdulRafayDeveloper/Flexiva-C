@@ -1,12 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import Swal from 'sweetalert2';
 const base_url= process.env.REACT_APP_BASE_URL;
 console.log(base_url);
 
-export const registerUser = createAsyncThunk("registerUser", async (formData, { rejectWithValue }) => {
+export const registerUser = createAsyncThunk("registerUser", async (user, { rejectWithValue }) => {
   try {
-    const response = await fetch(`${base_url}/signup`, {
+    
+    console.log("in register user", user);
+    const response = await fetch(`http://127.0.0.1:3500/users`, {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json"
+      },
+    body: JSON.stringify(user)
     });
 
     const responseData = await response.json();
@@ -70,12 +76,22 @@ const userSlicer = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.auth_token=action.payload;
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Form Submitted Successfully!'
+        });
         console.log(state.auth_token);
         // You can handle the registration success if needed
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: `${state.error}`
+        });
       })
 
       .addCase(loginUser.pending, (state) => {

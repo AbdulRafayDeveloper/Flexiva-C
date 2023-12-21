@@ -12,6 +12,7 @@ import logo from "../assets/image/logo.png";
 import { Helmet } from 'react-helmet';
 import { useDispatch, useSelector } from "react-redux";
 import { setUserField } from "../../features/userSlicer";
+import Swal from "sweetalert2";
 
 
 function Header() {
@@ -49,12 +50,24 @@ function Header() {
   const error = useSelector((state) => state.user.error);
 
   const handleSignUpSubmit = async (event) => {
-    event.preventDefault();  
+    event.preventDefault();
+  
+    // Check if the password length is exactly 6 characters
+    if (user.password.length < 6) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Password Length',
+        text: 'Password must be 6 or more characters long!'
+      });
+      return; // Exit the function if password length is invalid
+    }
+  
+    // If password length is valid, proceed to set user field
     dispatch(setUserField(user));    
     setShowSignUp(false);
     navigate('/signin');
-
   }
+  
 
   return (
     <>
@@ -124,6 +137,7 @@ function Header() {
                                 type="text"
                                 placeholder=""
                                 name="fullName"
+                                required
                                 onChange={onChange}
                               />
                               <Form.Label>Email address</Form.Label>
@@ -132,6 +146,7 @@ function Header() {
                                 type="email"
                                 placeholder=""
                                 name="email"
+                                required
                                 onChange={onChange}
                               />
                               <Form.Label>Password</Form.Label>
@@ -140,6 +155,7 @@ function Header() {
                                 type="password"
                                 placeholder=""
                                 name="password"
+                                required
                                 onChange={onChange}
                               />
                             </Form.Group>
@@ -151,6 +167,7 @@ function Header() {
                               <Form.Check
                                 type="checkbox"
                                 label="Accept the rules"
+                                required
                               />
                             </Form.Group>
                             
