@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import "../assets/css/form.css";
 import thankU from '../assets/image/thanku.png'
 import { useDispatch, useSelector } from "react-redux";
@@ -155,6 +155,7 @@ function Signin() {
       role: "user"
     });
     const [emptyFields, setEmptyFields] = useState([]);
+    const [forceUpdate, setForceUpdate] = useState(false);
 
     const onChange = (element) => {
       if(element.target.name == "medicalCondition" || element.target.name == "medication"){
@@ -166,8 +167,14 @@ function Signin() {
     }
     const userStateData = useSelector((state) => state.user.data);
     const dispatch = useDispatch();
+    useEffect(() => {
+      console.log("Updated User Data:", userStateData);
+      if(userStateData.role && userStateData.fitnessWeightLossGoalDesc){
+        dispatch(registerUser(userStateData));
+      }
+    }, [userStateData, forceUpdate]); 
 
-    const handleNextClick = async () => {
+    const handleNextClick = useCallback(async () => {
       let requiredFields;
     
       if (user.medicalCondition && !user.medication) {
@@ -186,7 +193,9 @@ function Signin() {
       if (empty.length === 0) {
         try {
           await dispatch(setUserField(user)); // Wait for setUserField to complete
-          await dispatch(registerUser(userStateData)); // Wait for registerUser to complete
+          setForceUpdate(prev => !prev);
+          console.log("udated chachu", userStateData);
+          // await dispatch(registerUser(userStateData)); 
           // setStep(step + 1);
         } catch (error) {
           console.error("Error setting user or registering:", error);
@@ -203,7 +212,7 @@ function Signin() {
           text: 'Please fill all required fields!'
         });
       }      
-    };
+    }, [user, userStateData, dispatch]);;
 
 
     return (

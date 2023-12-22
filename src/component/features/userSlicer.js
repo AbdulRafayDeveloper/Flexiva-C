@@ -65,7 +65,6 @@ const userSlicer = createSlice({
     setUserField: (state, action) => {
       // Merge action payload into user data
       state.data = { ...state.data, ...action.payload };
-      console.log(state.data);
     },
   },
   extraReducers: (builder) => {
