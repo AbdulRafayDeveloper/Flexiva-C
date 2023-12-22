@@ -167,6 +167,7 @@ function Signin() {
     }
     const userStateData = useSelector((state) => state.user.data);
     const dispatch = useDispatch();
+
     useEffect(() => {
       console.log("Updated User Data:", userStateData);
       if(userStateData.role && userStateData.fitnessWeightLossGoalDesc){
@@ -194,9 +195,8 @@ function Signin() {
         try {
           await dispatch(setUserField(user)); // Wait for setUserField to complete
           setForceUpdate(prev => !prev);
-          console.log("udated chachu", userStateData);
           // await dispatch(registerUser(userStateData)); 
-          // setStep(step + 1);
+          setStep(step + 1);
         } catch (error) {
           console.error("Error setting user or registering:", error);
           Swal.fire({
