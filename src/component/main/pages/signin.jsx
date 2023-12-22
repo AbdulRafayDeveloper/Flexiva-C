@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import "../assets/css/form.css";
 import thankU from '../assets/image/thanku.png'
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser, setUserField } from "../../features/userSlicer";
+import { registerUser, setStep, setUserField } from "../../features/userSlicer";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
@@ -37,7 +37,7 @@ function Signin() {
     }
   }, [userStateData]);
   
-  const [step, setStep] = useState(0);
+  const step= useSelector((state)=>state.user.step);
   const [hideButton, setHideButton] = useState(0);
 
   const step_form = step + 1;
@@ -78,7 +78,7 @@ function Signin() {
   
       if (empty.length === 0) {
         dispatch(setUserField(user));
-        setStep(step + 1);
+        dispatch(setStep(step + 1));
       }else{
         console.log(empty);
         Swal.fire({
@@ -146,6 +146,7 @@ function Signin() {
   };
 
   const Contact = () => {
+    
     const [user, setUser] = useState({
       medicalCondition: false,
       medicalConditionYesDetail: "",
@@ -156,6 +157,8 @@ function Signin() {
     });
     const [emptyFields, setEmptyFields] = useState([]);
     const [forceUpdate, setForceUpdate] = useState(false);
+    const dispatch = useDispatch();
+    const userStateData = useSelector((state) => state.user.data);
 
     const onChange = (element) => {
       if(element.target.name == "medicalCondition" || element.target.name == "medication"){
@@ -165,16 +168,15 @@ function Signin() {
         setUser({ ...user, [element.target.name]: element.target.value });
       }
     }
-    const userStateData = useSelector((state) => state.user.data);
-    const dispatch = useDispatch();
 
+    // Update Data save in Database
     useEffect(() => {
-      console.log("Updated User Data:", userStateData);
       if(userStateData.role && userStateData.fitnessWeightLossGoalDesc){
         dispatch(registerUser(userStateData));
       }
     }, [userStateData, forceUpdate]); 
 
+    // Handle Next Click of step 1
     const handleNextClick = useCallback(async () => {
       let requiredFields;
     
@@ -189,14 +191,12 @@ function Signin() {
       }
     
       const empty = requiredFields.filter(field => !user[field]);
-      console.log(empty);
       setEmptyFields(empty);
       if (empty.length === 0) {
         try {
-          await dispatch(setUserField(user)); // Wait for setUserField to complete
+          await dispatch(setUserField(user)); 
           setForceUpdate(prev => !prev);
-          // await dispatch(registerUser(userStateData)); 
-          setStep(step + 1);
+          dispatch(setStep(step + 1));
         } catch (error) {
           console.error("Error setting user or registering:", error);
           Swal.fire({
@@ -306,6 +306,7 @@ function Signin() {
   };
 
   const Welcome = () => {
+
     return (
       <>
         <div className="final">

@@ -11,7 +11,7 @@ import GitIcon from "../assets/image/GitHub.png";
 import logo from "../assets/image/logo.png";
 import { Helmet } from 'react-helmet';
 import { useDispatch, useSelector } from "react-redux";
-import { setUserField } from "../../features/userSlicer";
+import { resetUserState, setUserField } from "../../features/userSlicer";
 import Swal from "sweetalert2";
 
 
@@ -20,7 +20,7 @@ function Header() {
   const [showSignIn, setShowSignIn] = useState(false);
 
   const handleCloseSignUp = () => {setShowSignUp(false)};
-  const handleShowSignUp = () => {setShowSignUp(true); setShowSignIn(false)};
+  const handleShowSignUp = () => {setShowSignUp(true); setShowSignIn(false); dispatch(resetUserState())};
 
   const handleCloseSignIn = () => {setShowSignIn(false)};
   const handleShowSignIn = () => {setShowSignIn(true);setShowSignUp(false)};

@@ -55,7 +55,8 @@ const initialState = {
   data:{},
   loading: false,
   error: null,
-  auth_token: null
+  auth_token: null,
+  step:0
 };
 
 const userSlicer = createSlice({
@@ -66,6 +67,15 @@ const userSlicer = createSlice({
       // Merge action payload into user data
       state.data = { ...state.data, ...action.payload };
     },
+    setStep: (state, action) => {
+      // Merge action payload into user data
+      state.step = action.payload;
+    },
+    resetUserState: (state) => {
+      state.data={};
+      state.step=0;
+      console.log(state.step);
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -109,6 +119,8 @@ const userSlicer = createSlice({
   },
 });
 export const {
-    setUserField
+    setUserField,
+    resetUserState,
+    setStep
   } = userSlicer.actions;
 export default userSlicer.reducer;
